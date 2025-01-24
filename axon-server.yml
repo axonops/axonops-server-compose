@@ -1,0 +1,21 @@
+host: 0.0.0.0 # axon-server endpoint used by the API and the agents
+api_port: 8080 # API port (axon-server <> axon-dash)
+agents_port: 1888 # axon-server <> axon-agents
+elastic_hosts:
+  - http://elasticsearch:9200
+elastic_discover_nodes: false
+
+#license_key: enter your AxonOps license key to unlock all features
+#org_name: enter the organisation name associated with your license key
+
+axon_dash_url: http://axon-dash:3000
+
+cql_autocreate_tables: true
+cql_hosts:
+  - cassandra
+cql_keyspace: axonops
+cql_username: cassandra
+cql_password: cassandra
+cql_ssl: false
+
+metrics_cache_size_mb: 1024

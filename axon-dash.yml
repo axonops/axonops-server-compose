@@ -1,0 +1,6 @@
+axon-dash:
+  host: 0.0.0.0
+  port: 3000
+axon-server:
+  private_endpoints: http://axon-server:8080
+  context_path: ""

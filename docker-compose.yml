@@ -1,0 +1,75 @@
+services:
+  init:
+    image: busybox
+    command: "chown 1000:0 /usr/share/elasticsearch/data"
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - 'ES_JAVA_OPTS=-Xms8g -Xmx8g'
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-sSfk", "http://127.0.0.1:9200"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+
+  cassandra:
+    image: cassandra:4.1
+    restart: unless-stopped
+    volumes:
+      - ./data/cassandra:/var/lib/cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=axonops-cluster
+      - MAX_HEAP_SIZE=8g
+      - HEAP_NEWSIZE=800m
+    ports:
+      - "9042:9042"
+    healthcheck:
+      test: ["CMD", "nodetool", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  axon-server:
+    image: registry.axonops.com/axonops-public/axonops-docker/axon-server:latest
+    restart: unless-stopped
+    ports:
+      - "1888:1888"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "127.0.0.1:8080"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+    volumes:
+        - ./axon-server.yml:/etc/axonops/axon-server.yml:ro
+
+  axon-dash:
+    image: registry.axonops.com/axonops-public/axonops-docker/axon-dash:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      axon-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "127.0.0.1:3000"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+    volumes:
+      - ./axon-dash.yml:/etc/axonops/axon-dash.yml:ro
