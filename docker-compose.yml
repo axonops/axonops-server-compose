@@ -91,6 +91,7 @@ services:
   axon-server:
     image: registry.axonops.com/axonops-public/axonops-docker/axon-server:latest
     restart: unless-stopped
+    command: ["/usr/share/axonops/axon-server"]
     ports:
       - "1888:1888"
     depends_on:
