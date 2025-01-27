@@ -12,7 +12,7 @@ It has been tested on Debian 12 with Docker, although it should work in other en
 
 ## Accessing AxonOps
 
-Once the services are running, access the AxonOps dashboard at: http://localhost:3000 and you can confifure your AxonOps agents to point at the AxonOps Server to start managing your cluster.
+Once the services are running, access the AxonOps dashboard at: http://localhost:3000 and you can configure your AxonOps agents to point at the AxonOps Server to start managing your cluster.
 
 For production deployments, ensure proper security configurations are in place and refer to the official documentation for advanced setup options.
 
