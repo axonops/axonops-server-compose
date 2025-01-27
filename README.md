@@ -11,12 +11,6 @@ This project can be run using either Docker or [Podman](https://podman.io).
 
 While Docker is the most widely used container runtime and perfectly suitable for running AxonOps, Podman offers some compelling features like its Apache Licence, daemonless architecture and enhanced security through rootless execution by default. Choose the runtime that best suits your needs and environment.
 
-## Prerequisites
-- Docker Compose or Podman Compose installed on your system
-- 4 CPU Cores
-- 16GB memory
-- 30GB storage for elasticsearch
-
 ## Installation Instructions
 
 ### Using Docker
