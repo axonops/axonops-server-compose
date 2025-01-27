@@ -1,9 +1,26 @@
 services:
   init:
     image: busybox
-    command: "chown 1000:0 /usr/share/elasticsearch/data"
+    command: |
+      sh -c "
+        # Fix permissions for Elasticsearch data/log dirs
+        chown 1000:0 /usr/share/elasticsearch/data &&
+        chown 1000:0 /usr/share/elasticsearch/logs &&
+
+        # Fix permissions for Cassandra data/log dirs
+        chown -R 999:999 /var/lib/cassandra &&
+        chown -R 999:999 /var/log/cassandra &&
+
+        # Create AxonOps logs dir
+        mkdir -p /var/log/axonops &&
+        chown -R 1000:0 /var/log/axonops
+      "
     volumes:
       - ./data/elasticsearch:/usr/share/elasticsearch/data
+      - ./logs/elasticsearch:/usr/share/elasticsearch/logs
+      - ./data/cassandra:/var/lib/cassandra
+      - ./logs/cassandra:/var/log/cassandra
+      - ./logs/axonops:/var/log/axonops
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
@@ -25,14 +42,16 @@ services:
           memory: 8G
     volumes:
       - ./data/elasticsearch:/usr/share/elasticsearch/data
+      - ./logs/elasticsearch:/usr/share/elasticsearch/logs
     depends_on:
       init:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "curl", "-sSfk", "http://127.0.0.1:9200"]
+      test: ["CMD-SHELL", "curl -sS http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow\\&timeout=5s || exit 1"]
       interval: 10s
       timeout: 5s
-      start_period: 30s
+      retries: 10
+      start_period: 90s
 
   cassandra:
     image: cassandra:4.1
@@ -45,6 +64,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/cassandra:/var/lib/cassandra
+      - ./logs/cassandra:/var/log/cassandra
     environment:
       - CASSANDRA_CLUSTER_NAME=axonops-cluster
       - MAX_HEAP_SIZE=8g
@@ -61,10 +81,10 @@ services:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "nodetool", "status"]
+      test: ["CMD-SHELL", "nodetool statusbinary | grep running"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 20
       start_period: 90s
 
   axon-server:
@@ -84,6 +104,7 @@ services:
       start_period: 10s
     volumes:
         - ./axon-server.yml:/etc/axonops/axon-server.yml:ro
+        - ./logs/axonops:/var/log/axonops
 
   axon-dash:
     image: registry.axonops.com/axonops-public/axonops-docker/axon-dash:latest
@@ -100,3 +121,4 @@ services:
       start_period: 10s
     volumes:
       - ./axon-dash.yml:/etc/axonops/axon-dash.yml:ro
+      - ./logs/axonops:/var/log/axonops
