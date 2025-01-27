@@ -10,6 +10,14 @@ For detailed documentation, visit:
 ## Container Runtime Options
 This project can be run using either Docker or [Podman](https://podman.io).
 
+## Accessing AxonOps
+
+Once the services are running, access the AxonOps dashboard at: http://localhost:3000 and you can confifure you AxonOps agents to point at the AxonOps Server to start managing your cluster.
+
+For production deployments, ensure proper security configurations are in place and refer to the official documentation for advanced setup options.
+
+The platform provides dynamic dashboards for collecting logs and metrics, offering insights into cluster performance and health status. You can set up alerts for various metrics to ensure optimal performance.
+
 ## Instructions
 
 ### Using Docker
@@ -67,16 +75,6 @@ podman system prune
 # View system information
 podman system info
 ```
-
-## Accessing AxonOps
-
-Once the services are running, access the AxonOps dashboard at: http://localhost:3000
-
-For production deployments, ensure proper security configurations are in place and refer to the official documentation for advanced setup options.
-
-The platform provides dynamic dashboards for collecting logs and metrics, offering insights into cluster performance and health status. You can set up alerts for various metrics to ensure optimal performance.
-
-
 
 ***
 
