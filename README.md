@@ -5,6 +5,14 @@ For detailed documentation, visit:
 - Documentation: https://axonops.com/docs
 - Product Information: https://axonops.com
 
+## Self-Hosting AxonOps
+When self-hosting AxonOps using this `docker-compose.yml` file:
+1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
+2. The **axon-dash** service provides the dashboards and user interface.
+3. Data is stored in:
+   - **Elasticsearch**, which handles indexing and search functionality.
+   - **Cassandra**, which manages time-series data storage.
+
 ## Container Runtime Options
 This project can be run using either Docker or [Podman](https://podman.io).
 
@@ -67,14 +75,6 @@ The `busybox` container runs a simple script that adjusts file ownership and per
 #### **cassandra**
 - Stores time-series data used by AxonOps for long-term storage and analysis.
 - Configured with mounted volumes to ensure durability of stored data.
-
-### Self-Hosting AxonOps
-When self-hosting AxonOps using this `docker-compose.yml` file:
-1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
-2. The **axon-dash** service provides the dashboards and user interface.
-3. Data is stored in:
-   - **Elasticsearch**, which handles indexing and search functionality.
-   - **Cassandra**, which manages time-series data storage.
 
 ### Notes
 - Ensure that the mounted volumes have appropriate permissions before starting the services. The `busybox` initialization container takes care of this automatically during startup.
