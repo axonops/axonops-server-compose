@@ -1,5 +1,5 @@
 # AxonOps™ Server Docker Compose
-AxonOps is a comprehensive management platform designed for Apache Cassandra and Apache Kafka, offering unified monitoring, maintenance, and backup functionalities. Built by Cassandra and Kafka experts, it provides the only cloud-native solution to monitor, maintain and backup Apache Cassandra or Apache Kafka clusters through either SaaS or self-hosted deployments.
+AxonOps is a comprehensive management platform designed for Apache Cassandra® and Apache Kafka®, offering unified monitoring, maintenance, and backup functionalities. Built by Cassandra and Kafka experts, it provides the only cloud-native solution to monitor, maintain and backup Apache Cassandra or Apache Kafka clusters through either SaaS or self-hosted deployments.
 
 For detailed documentation, visit:
 - Documentation: https://axonops.com/docs
@@ -26,8 +26,8 @@ The `docker-compose.yml` file in this repository defines the services, networks,
 The `docker-compose.yml` file orchestrates the following services:
 1. **axon-server**: The core backend component of AxonOps. This service handles communication with agents and exposes REST APIs for configuration.
 2. **axon-dash**: The frontend component providing dashboards and a user interface for interacting with AxonOps.
-3. **Elasticsearch**: A search and analytics engine used by AxonOps to store and index data.
-4. **Apache Cassandra**: A distributed NoSQL database used by AxonOps to store time-series data.
+3. **Elasticsearch®**: A search engine used by AxonOps to store and index data.
+4. **Apache Cassandra®**: A distributed NoSQL database used by AxonOps to store time-series data.
 5. **busybox (initialization container)**: Ensures proper file permissions for mounted volumes before starting Elasticsearch and Cassandra.
 
 ### Key Components
