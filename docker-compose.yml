@@ -11,6 +11,12 @@ services:
     environment:
       - discovery.type=single-node
       - 'ES_JAVA_OPTS=-Xms8g -Xmx8g'
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+        reservations:
+          memory: 8G
     volumes:
       - ./data/elasticsearch:/usr/share/elasticsearch/data
     depends_on:
@@ -31,6 +37,12 @@ services:
       - CASSANDRA_CLUSTER_NAME=axonops-cluster
       - MAX_HEAP_SIZE=8g
       - HEAP_NEWSIZE=800m
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+        reservations:
+          memory: 8G
     ports:
       - "9042:9042"
     healthcheck:
