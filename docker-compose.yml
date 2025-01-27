@@ -12,8 +12,7 @@ services:
         chown -R 999:999 /var/log/cassandra &&
 
         # Create AxonOps logs dir
-        mkdir -p /var/log/axonops &&
-        chown -R 1000:0 /var/log/axonops
+        chown -R 9988:9988 /var/log/axonops
       "
     volumes:
       - ./data/elasticsearch:/usr/share/elasticsearch/data
