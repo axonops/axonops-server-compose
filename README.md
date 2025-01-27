@@ -17,7 +17,7 @@ When running memory-intensive containers like Elasticsearch or Cassandra using P
 
 This occurs because Podman on macOS runs containers inside a Linux virtual machine (called a "machine") with default memory limits that may be insufficient for your workload. If you see errors containing "insufficient memory" or "failed to map" memory segments, increase your Podman machine's memory allocation using `podman machine stop && podman machine set --memory 16384 && podman machine start`. The memory value should exceed the combined heap sizes of your containers plus overhead - for example, when running Elasticsearch with 8GB heap, allocate at least 16GB to the Podman machine. For more details about Podman machine management and configuration, refer to the official documentation at https://docs.podman.io/en/latest/markdown/podman-machine.1.html.
 
-## Installation Instructions
+## Instructions
 
 ### Using Docker
 ```bash
@@ -29,27 +29,7 @@ cd axonops-server-compose
 docker compose up -d
 ```
 
-### Using Podman on Mac
-```bash
-# Clone repository
-git clone https://github.com/axonops/axonops-server-compose
-cd axonops-server-compose
-
-# Start services
-podman compose up -d
-```
-
-### Using Podman on Windows
-```bash
-# Clone repository
-git clone https://github.com/axonops/axonops-server-compose
-cd axonops-server-compose
-
-# Start services
-podman compose up -d
-```
-
-### Using Podman on Linux
+### Using Podman
 ```bash
 # Clone repository
 git clone https://github.com/axonops/axonops-server-compose
