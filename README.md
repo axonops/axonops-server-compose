@@ -1,5 +1,6 @@
-# AxonOps™ Server Docker Compose
+# WARNING - IN DEVELOPMENT, DO NOT USE
 
+# AxonOps™ Server Docker Compose
 AxonOps is a comprehensive management platform designed for Apache Cassandra and Apache Kafka, offering unified monitoring, maintenance, and backup functionalities. Built by Cassandra and Kafka experts, it provides the only cloud-native solution to monitor, maintain and backup Apache Cassandra or Apache Kafka clusters through either SaaS or self-hosted deployments.
 
 For detailed documentation, visit:
