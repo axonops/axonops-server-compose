@@ -10,20 +10,6 @@ For detailed documentation, visit:
 ## Container Runtime Options
 This project can be run using either Docker or [Podman](https://podman.io).
 
-While Docker is the most widely used container runtime and perfectly suitable for running AxonOps, Podman offers some compelling features like its Apache Licence, daemonless architecture and enhanced security through rootless execution by default. Choose the runtime that best suits your needs and environment.
-
-### Memory Management with Podman on macOS
-
-When running memory-intensive containers like Elasticsearch or Cassandra using Podman on macOS, you may encounter Java heap space errors or memory allocation failures.
-
-This occurs because Podman on macOS runs containers inside a Linux virtual machine (called a "machine") with default memory limits that may be insufficient for your workload. If you see errors containing "insufficient memory" or "failed to map" memory segments, increase your Podman machine's memory allocation using:
-
-```bash
-podman machine stop && podman machine set --memory 16384 && podman machine start
-```
-
-The memory value should exceed the combined heap sizes of your containers plus overhead - for example, when running Elasticsearch with 8GB heap, allocate at least 16GB to the Podman machine. For more details about Podman machine management and configuration, refer to the official documentation at https://docs.podman.io/en/latest/markdown/podman-machine.1.html.
-
 ## Instructions
 
 ### Using Docker
