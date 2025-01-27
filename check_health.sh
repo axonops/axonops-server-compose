@@ -39,10 +39,18 @@ fi
 services=$("$CONTAINER_RUNTIME" compose ps --services)
 exit_code=0
 
+expected_services="elasticsearch cassandra axon-server axon-dash"
+for svc in $expected_services; do
+    if ! (echo "$services" | grep -q "$svc"); then
+        log_error "Service $svc is not running"
+        exit_code=1
+    fi
+done
+
 for service in $services; do
     # Check health status for each service
     health_status=$("$CONTAINER_RUNTIME" inspect --format='{{json .State.Health.Status}}' "$("$CONTAINER_RUNTIME" compose ps -q "$service")" 2>/dev/null | tr -d '"')
-    
+
     if [[ $? -ne 0 ]]; then
         log_error "Failed to retrieve health status for service: $service"
         exit_code=1
