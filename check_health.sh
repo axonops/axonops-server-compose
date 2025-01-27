@@ -29,10 +29,6 @@ if ! "$CONTAINER_RUNTIME" compose version &> /dev/null; then
     exit 1
 fi
 
-# Navigate to the directory containing the docker-compose.yml file
-COMPOSE_DIR="/path/to/your/docker-compose.yml"
-cd "$COMPOSE_DIR" || { log_error "Failed to navigate to $COMPOSE_DIR"; exit 1; }
-
 # Check if services are running using the selected runtime
 if ! "$CONTAINER_RUNTIME" compose ps &> /dev/null; then
     log_error "$CONTAINER_RUNTIME compose services are not running."
