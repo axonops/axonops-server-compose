@@ -5,6 +5,8 @@ For detailed documentation, visit:
 - Documentation: https://axonops.com/docs
 - Product Information: https://axonops.com
 
+For other self-host installation options like Kubernetes, see here: https://axonops.com/docs/installation-starter/axon-server/axonserver_install/
+
 ## Self-Hosting AxonOps
 When self-hosting AxonOps using this `docker-compose.yml` file:
 1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
