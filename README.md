@@ -13,6 +13,11 @@ When self-hosting AxonOps using this `docker-compose.yml` file:
    - **Elasticsearch**, which handles indexing and search functionality.
    - **Cassandra**, which manages time-series data storage.
 
+### Install License (Optional)  
+AxonOps is free to use and includes a range of powerful features at no cost.
+
+For enterprise customers with a license key, you can enhance your installation by adding the key to the `axon-server.yml` file. Ensure that the organization name matches the one used when obtaining your license.
+
 ## Container Runtime Options
 This project can be run using either Docker or [Podman](https://podman.io).
 
