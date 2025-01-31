@@ -12,7 +12,7 @@ When self-hosting AxonOps using this `docker-compose.yml` file:
 1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
 2. The **axon-dash** service provides the dashboards and user interface.
 3. Data is stored in:
-   - **Elasticsearch**, which handles indexing and search functionality.
+   - **Elasticsearch®**, which handles indexing and search functionality.
    - **Cassandra**, which manages time-series data storage.
 
 ### Install License (Optional)  
