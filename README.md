@@ -21,7 +21,7 @@ AxonOps is free to use and includes a range of powerful features at no cost.
 For enterprise customers with a license key, you can enhance your installation by adding the key to the `axon-server.yml` file. Ensure that the organization name matches the one used when obtaining your license.
 
 ## Container Runtime Options
-This project can be run using either Docker or [Podman](https://podman.io).
+This project can be run using either [Docker](https://docker.com) or [Podman](https://podman.io).
 
 It has been tested on Debian 12 with Docker, although it should work in other environments. Please raise an issue on the project if you encounter any problems specific to your setup.
 
