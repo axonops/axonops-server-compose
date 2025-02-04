@@ -2,6 +2,7 @@
 AxonOps is a comprehensive management platform designed for Apache Cassandra® and Apache Kafka®, offering unified monitoring, maintenance, and backup functionalities. Built by Cassandra and Kafka experts, it provides the only cloud-native solution to monitor, maintain and backup Apache Cassandra or Apache Kafka clusters through either SaaS or self-hosted deployments.
 
 For detailed documentation, visit:
+- Demo https://axonops.com/demo-sandbox/
 - Documentation: https://axonops.com/docs
 - Product Information: https://axonops.com
 
