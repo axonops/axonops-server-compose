@@ -7,6 +7,39 @@ For detailed documentation, visit:
 
 For other self-host installation options like Kubernetes, see here: https://axonops.com/docs/installation-starter/axon-server/axonserver_install/
 
+# Table of Contents
+
+1. [AxonOps™ Server Docker Compose](#axonops-server-docker-compose)
+2. [Self-Hosting AxonOps](#self-hosting-axonops)
+   - [Install License (Optional)](#install-license-optional)
+3. [Container Runtime Options](#container-runtime-options)
+4. [Accessing AxonOps](#accessing-axonops)
+5. [Compose Structure](#compose-structure)
+   - [Overview](#overview)
+   - [Key Components](#key-components)
+     - [Volumes](#volumes)
+     - [Initialization with BusyBox](#initialization-with-busybox)
+   - [Service Details](#service-details)
+     - [axon-server](#axon-server)
+     - [axon-dash](#axon-dash)
+     - [elasticsearch](#elasticsearch)
+     - [cassandra](#cassandra)
+6. [Notes](#notes)
+7. [Instructions](#instructions)
+   - [Using Docker](#using-docker)
+   - [Using Podman](#using-podman)
+8. [Health Check Script](#health-check-script)
+   - [Purpose](#purpose)
+   - [Usage](#usage)
+     - [Prerequisites](#prerequisites)
+     - [Running the Script](#running-the-script)
+       - [Manual Execution](#manual-execution)
+       - [Run using Docker (default)](#run-using-docker-default)
+       - [Run using Podman](#run-using-podman)
+9. [Useful Commands](#useful-commands)
+   - [Container Management](#container-management)
+   - [Resource Management](#resource-management)
+
 ## Self-Hosting AxonOps
 When self-hosting AxonOps using this `docker-compose.yml` file:
 1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
