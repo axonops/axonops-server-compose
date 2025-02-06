@@ -8,39 +8,6 @@ For detailed documentation, visit:
 
 For other self-host installation options like Kubernetes, see here: https://axonops.com/docs/installation-starter/axon-server/axonserver_install/
 
-# Table of Contents
-
-1. [AxonOps™ Server Docker Compose](#axonops-server-docker-compose)
-2. [Self-Hosting AxonOps](#self-hosting-axonops)
-   - [Install License (Optional)](#install-license-optional)
-3. [Container Runtime Options](#container-runtime-options)
-4. [Accessing AxonOps](#accessing-axonops)
-5. [Compose Structure](#compose-structure)
-   - [Overview](#overview)
-   - [Key Components](#key-components)
-     - [Volumes](#volumes)
-     - [Initialization with BusyBox](#initialization-with-busybox)
-   - [Service Details](#service-details)
-     - [axon-server](#axon-server)
-     - [axon-dash](#axon-dash)
-     - [elasticsearch](#elasticsearch)
-     - [cassandra](#cassandra)
-6. [Notes](#notes)
-7. [Instructions](#instructions)
-   - [Using Docker](#using-docker)
-   - [Using Podman](#using-podman)
-8. [Health Check Script](#health-check-script)
-   - [Purpose](#purpose)
-   - [Usage](#usage)
-     - [Prerequisites](#prerequisites)
-     - [Running the Script](#running-the-script)
-       - [Manual Execution](#manual-execution)
-       - [Run using Docker (default)](#run-using-docker-default)
-       - [Run using Podman](#run-using-podman)
-9. [Useful Commands](#useful-commands)
-   - [Container Management](#container-management)
-   - [Resource Management](#resource-management)
-
 ## Self-Hosting AxonOps
 When self-hosting AxonOps using this `docker-compose.yml` file:
 1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
@@ -145,44 +112,64 @@ cd axonops-server-compose
 podman compose up -d
 ```
 
-## Health Check Script
+### Health Check Script
 
-This project includes a **health check script** (`check_health.sh`) to monitor the status of all services deployed via Docker Compose or Podman Compose. The script ensures that all services are healthy and logs any errors to the system log (`syslog`) for troubleshooting.
+This repository includes a **health-check script** (`health-check.sh`) designed to monitor and verify the status of services running in a Docker or Podman Compose environment. Below is an explanation of what the script does, how it works, and its purpose:
 
-### Purpose
-The health check script is designed to:
-- Verify that the container runtime (Docker or Podman) is functioning correctly.
-- Check the health status of all services defined in the `docker-compose.yml` file.
-- Log errors to `syslog` if any services are unhealthy or if there are issues with the container runtime.
+#### Purpose
+The health-check script ensures that all expected services in the Compose environment are running and healthy. It helps system administrators or developers quickly identify issues with containerized services by logging errors for any missing or unhealthy services.
 
-### Usage
+#### How the Script Works
 
-#### Prerequisites
-1. Ensure you have either **Docker** or **Podman** installed on your system.
-2. Make sure the `check_health.sh` script is executable. If not, run:
+1. **Logging Errors**:
+   - The script uses a `log_error` function to log error messages to the system's syslog with the tag `container-health-check`.
+
+2. **Container Runtime Selection**:
+   - By default, the script assumes the container runtime is `docker`.
+   - If `podman` is passed as an argument, it switches to using Podman.
+   - If an invalid argument is passed, the script exits with an error message.
+
+3. **Runtime Validation**:
+   - The script checks if the selected container runtime (`docker` or `podman`) is installed and available in the system's PATH.
+   - It also verifies that the Compose plugin for the selected runtime is installed.
+
+4. **Service Status Check**:
+   - The script uses `docker compose ps` (or `podman compose ps`) to list all services in the Compose environment.
+   - It compares these services against a predefined list of expected services: `elasticsearch`, `cassandra`, `axon-server`, and `axon-dash`.
+   - If any expected service is not running, it logs an error.
+
+5. **Health Status Check**:
+   - For each running service, the script retrieves its health status using the `inspect` command.
+   - If a service's health status is not `healthy`, or if its health check fails, an error is logged.
+
+6. **Exit Code**:
+   - The script exits with a code of `0` if all services are running and healthy.
+   - If any issues are detected (e.g., missing or unhealthy services), it exits with a non-zero code.
+
+#### **Usage**
+
+To run the script:
 
 ```bash
-chmod +x check_health.sh
+./health-check.sh [runtime]
 ```
 
-#### Running the Script
-You can run the script manually or schedule it as a cron job to execute periodically.
+- `[runtime]`: Optional argument to specify the container runtime (`docker` or `podman`). Defaults to `docker`.
 
-##### Manual Execution
-To run the script manually, use the following command:
+#### **Example Output**
 
-```bash
-./check_health.sh [docker|podman]
-```
+- If all services are running and healthy:
+  ```bash
+  # No output; exit code 0
+  ```
 
-#### Run using Docker (default)
-```bash
-./check_health.sh
-```
-#### Run using Podman
-```bash
-./check_health.sh podman
-```
+- If a service is missing or unhealthy:
+  ```bash
+  ERROR: Service cassandra is not running
+  ERROR: Service elasticsearch is not healthy. Current status: starting
+  ```
+
+The errors are also logged to syslog for further debugging.
 
 ## Useful Commands
 Commands work the same way for both Docker and Podman - just replace `podman` with `docker` as needed.
