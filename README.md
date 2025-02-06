@@ -8,6 +8,25 @@ For detailed documentation, visit:
 
 For other self-host installation options like Kubernetes, see here: https://axonops.com/docs/installation-starter/axon-server/axonserver_install/
 
+## Table of Contents
+
+1.  [Self-Hosting AxonOps](#self-hosting-axonops)
+    *   [Install License (Optional)](#install-license-optional)
+2.  [Container Runtime Options](#container-runtime-options)
+3.  [Accessing AxonOps](#accessing-axonops)
+4.  [Compose Structure](#compose-structure)
+    *   [Overview](#overview)
+    *   [Key Components](#key-components)
+    *   [Service Details](#service-details)
+    *   [Notes](#notes)
+5.  [Instructions](#instructions)
+    *   [Using Docker](#using-docker)
+    *   [Using Podman](#using-podman)
+6.  [Health Check Script](#health-check-script)
+    *   [How the Script Works](#how-the-script-works)
+    *   [Usage](#usage)
+        *   [Example Output](#example-output)
+
 ## Self-Hosting AxonOps
 When self-hosting AxonOps using this `docker-compose.yml` file:
 1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
@@ -167,42 +186,6 @@ To run the script:
   ```
 
 The errors are also logged to syslog for further debugging.
-
-## Useful Commands
-Commands work the same way for both Docker and Podman - just replace `podman` with `docker` as needed.
-
-**Container Management**
-```bash
-# List containers
-podman ps -a
-
-# Stop all containers
-podman compose down
-
-# View container logs
-podman logs <container_name>
-
-# Container stats
-podman stats
-
-# Pull latest images
-podman compose pull
-
-# Restart services
-podman compose restart
-```
-
-**Resource Management**
-```bash
-# View disk usage
-podman system df
-
-# Clean up unused resources
-podman system prune
-
-# View system information
-podman system info
-```
 
 ***
 
