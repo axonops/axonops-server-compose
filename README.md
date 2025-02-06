@@ -112,14 +112,11 @@ cd axonops-server-compose
 podman compose up -d
 ```
 
-### Health Check Script
+## Health Check Script
 
-This repository includes a **health-check script** (`health-check.sh`) designed to monitor and verify the status of services running in a Docker or Podman Compose environment. Below is an explanation of what the script does, how it works, and its purpose:
+This repository includes a **health-check script** (`health-check.sh`) designed to monitor and verify the status of services running in a Docker or Podman Compose environment. It ensures that all expected services in the Compose environment are running and healthy. It helps system administrators or developers quickly identify issues with containerized services by logging errors for any missing or unhealthy services.
 
-#### Purpose
-The health-check script ensures that all expected services in the Compose environment are running and healthy. It helps system administrators or developers quickly identify issues with containerized services by logging errors for any missing or unhealthy services.
-
-#### How the Script Works
+### How the Script Works
 
 1. **Logging Errors**:
    - The script uses a `log_error` function to log error messages to the system's syslog with the tag `container-health-check`.
@@ -146,7 +143,7 @@ The health-check script ensures that all expected services in the Compose enviro
    - The script exits with a code of `0` if all services are running and healthy.
    - If any issues are detected (e.g., missing or unhealthy services), it exits with a non-zero code.
 
-#### **Usage**
+### **Usage**
 
 To run the script:
 
