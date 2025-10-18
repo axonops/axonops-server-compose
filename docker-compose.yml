@@ -1,26 +1,4 @@
 services:
-  init:
-    image: busybox
-    command: |
-      sh -c "
-        # Fix permissions for Elasticsearch data/log dirs
-        chown 1000:0 /usr/share/elasticsearch/data &&
-        chown 1000:0 /usr/share/elasticsearch/logs &&
-
-        # Fix permissions for Cassandra data/log dirs
-        chown -R 999:999 /var/lib/cassandra &&
-        chown -R 999:999 /var/log/cassandra &&
-
-        # Create AxonOps logs dir
-        chown -R 9988:9988 /var/log/axonops
-      "
-    volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-      - ./logs/elasticsearch:/usr/share/elasticsearch/logs
-      - ./data/cassandra:/var/lib/cassandra
-      - ./logs/cassandra:/var/log/cassandra
-      - ./logs/axonops:/var/log/axonops
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
     cap_add:
@@ -32,19 +10,10 @@ services:
     restart: unless-stopped
     environment:
       - discovery.type=single-node
-      - 'ES_JAVA_OPTS=-Xms8g -Xmx8g'
-    deploy:
-      resources:
-        limits:
-          memory: 12G
-        reservations:
-          memory: 8G
+      - "ES_JAVA_OPTS=-Xms${ELASTICSEARCH_HEAP_SIZE:-8}g -Xmx${ELASTICSEARCH_HEAP_SIZE:-8}g"
     volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-      - ./logs/elasticsearch:/usr/share/elasticsearch/logs
-    depends_on:
-      init:
-        condition: service_completed_successfully
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - elasticsearch_logs:/usr/share/elasticsearch/logs
     healthcheck:
       test: ["CMD-SHELL", "curl -sS http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow\\&timeout=5s || exit 1"]
       interval: 10s
@@ -64,18 +33,12 @@ services:
     entrypoint: |
       sh -c "sed -i 's/^batch_size_warn_threshold:.*$/batch_size_warn_threshold: 64KiB/; s/^batch_size_fail_threshold:.*$/batch_size_fail_threshold: 640KiB/' /etc/cassandra/cassandra.yaml && exec /usr/local/bin/docker-entrypoint.sh"
     volumes:
-      - ./data/cassandra:/var/lib/cassandra
-      - ./logs/cassandra:/var/log/cassandra
+      - cassandra_data:/var/lib/cassandra
+      - cassandra_logs:/var/log/cassandra
     environment:
       - CASSANDRA_CLUSTER_NAME=axonops-cluster
-      - MAX_HEAP_SIZE=8g
-      - HEAP_NEWSIZE=800m
-    deploy:
-      resources:
-        limits:
-          memory: 12G
-        reservations:
-          memory: 8G
+      - MAX_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-8}g
+      - HEAP_NEWSIZE=${CASSANDRA_HEAP_NEWSIZE:-800m}
     ports:
       - "9042:9042"
     depends_on:
@@ -106,7 +69,7 @@ services:
       start_period: 10s
     volumes:
         - ./axon-server.yml:/etc/axonops/axon-server.yml:ro
-        - ./logs/axonops:/var/log/axonops
+        - axonops_logs:/var/log/axonops
 
   axon-dash:
     image: registry.axonops.com/axonops-public/axonops-docker/axon-dash:latest
@@ -123,4 +86,11 @@ services:
       start_period: 10s
     volumes:
       - ./axon-dash.yml:/etc/axonops/axon-dash.yml:ro
-      - ./logs/axonops:/var/log/axonops
+      - axonops_logs:/var/log/axonops
+
+volumes:
+  elasticsearch_data:
+  elasticsearch_logs:
+  cassandra_data:
+  cassandra_logs:
+  axonops_logs:
