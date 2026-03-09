@@ -12,6 +12,8 @@ api_host: 0.0.0.0
 # (AXONSERVER_PORT)
 api_port: 8080
 
+cql_hosts:
+  - timseriesdb
 cql_autocreate_tables: true
 cql_batch_size: 100
 # cql_keyspace_replication: '{ "class": "NetworkTopologyStrategy", "axonopsdb_dc1": 1 }'
@@ -28,6 +30,4 @@ cql_retrypolicy_max: 10s
 cql_retrypolicy_min: 2s
 cql_retrypolicy_numretries: 3
 cql_skip_verify: true
-cql_ssl: true
-cql_username: axonops
-cql_password: elPMIbnoy8M43ukLn4/qjuRC4tk
+cql_ssl: false

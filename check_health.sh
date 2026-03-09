@@ -39,7 +39,7 @@ fi
 services=$("$CONTAINER_RUNTIME" compose ps --services)
 exit_code=0
 
-expected_services="elasticsearch cassandra axon-server axon-dash"
+expected_services="axondb-search timseriesdb axon-server axon-dash"
 for svc in $expected_services; do
     if ! (echo "$services" | grep -q "$svc"); then
         log_error "Service $svc is not running"
