@@ -13,12 +13,12 @@ services:
       - cluster.name=axondb-search-cluster
       - node.name=opensearch-node1
       - network.host=0.0.0.0
-      - OPENSEARCH_HEAP_SIZE=${OPENSEARCH_HEAP_SIZE:-2g}
+      - OPENSEARCH_HEAP_SIZE=${OPENSEARCH_HEAP_SIZE:-1g}
       - AXONOPS_SEARCH_TLS_ENABLED=false
       - GENERATE_CERTS_ON_STARTUP=false
       - AXONOPS_SEARCH_ENABLE_BACKUPS=false
       - AXONOPS_SEARCH_USER=${AXONOPS_SEARCH_USER:-admin}
-      - AXONOPS_SEARCH_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
+      - AXONOPS_SEARCH_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
     volumes:
       - searchdb_data:/usr/share/opensearch/data
     healthcheck:
@@ -39,8 +39,8 @@ services:
     restart: unless-stopped
     environment:
       - CASSANDRA_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-1024M}
-      - AXONOPS_DB_USER=${AXONOPS_DB_USER:-admin}
-      - AXONOPS_DB_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
+      - AXONOPS_DB_USER=${AXONOPS_DB_USER:-axonops}
+      - AXONOPS_DB_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
     volumes:
       - timeseriesdb_data:/var/lib/cassandra
     ports:
@@ -68,11 +68,11 @@ services:
         condition: service_healthy
     environment:
       - SEARCH_DB_USERNAME=${AXONOPS_SEARCH_USER:-admin}
-      - SEARCH_DB_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
+      - SEARCH_DB_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
       - SEARCH_DB_HOSTS=http://axondb-search:9200
       - SEARCH_DB_SKIP_VERIFY=true
-      - CQL_USERNAME=${AXONOPS_DB_USER:-admin}
-      - CQL_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
+      - CQL_USERNAME=${AXONOPS_DB_USER:-axonops}
+      - CQL_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/api/v1/healthz"]
       interval: 10s
