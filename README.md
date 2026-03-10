@@ -6,7 +6,7 @@ AxonOps is a management platform for Apache Cassandra and Apache Kafka, offering
 - [Live Demo](https://axonops.com/demo-sandbox/)
 - [Documentation](https://axonops.com/docs)
 - [Product Website](https://axonops.com)
-- [Kubernetes Installation](https://axonops.com/docs/installation-starter/axon-server/axonserver_install/)
+- [Kubernetes Installation](https://axonops.com/docs/installation/kubernetes/)
 
 ---
 
