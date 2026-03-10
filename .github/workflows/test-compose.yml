@@ -1,0 +1,127 @@
+# name: Test Docker Compose
+
+# on:
+#   push:
+#     branches:
+#       - main
+#       - feat/**
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 10
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up Docker
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Start Docker Compose services
+#         run: docker compose up -d
+
+#       - name: Wait for services to be healthy
+#         run: |
+#           # Give services time to start
+#           sleep 120
+
+#           # Wait for all services to be healthy
+#           echo "Waiting for services to become healthy..."
+#           for i in {1..50}; do
+#             # Check if all expected services are healthy
+#             status=$(docker compose ps --format "{{.Service}}: {{.State}}" | grep -v "healthy" || true)
+
+#             if [ -z "$status" ]; then
+#               echo "✓ All services are healthy"
+#               break
+#             fi
+
+#             echo "Attempt $i/50: Waiting for services..."
+#             if [ $i -eq 50 ]; then
+#               echo "✗ Services did not become healthy in time"
+#               docker compose logs
+#               exit 1
+#             fi
+#             sleep 10
+#           done
+
+#       - name: Verify all containers are running
+#         run: |
+#           echo "Verifying containers..."
+#           docker compose ps
+
+#           # Check that all expected services exist and are running
+#           expected_services="axondb-search timseriesdb axon-server axon-dash"
+#           for service in $expected_services; do
+#             if ! docker compose ps "$service" | grep -q "Up"; then
+#               echo "✗ Service $service is not running"
+#               docker compose logs "$service"
+#               exit 1
+#             fi
+#             echo "✓ Service $service is running"
+#           done
+
+#       - name: Test connectivity to AxonOps Dashboard (port 3000)
+#         run: |
+#           echo "Testing connectivity to port 3000..."
+#           max_attempts=30
+#           attempt=1
+
+#           while [ $attempt -le $max_attempts ]; do
+#             if curl -sf http://localhost:3000 > /dev/null; then
+#               echo "✓ Successfully connected to AxonOps Dashboard on port 3000"
+#               exit 0
+#             fi
+
+#             echo "Attempt $attempt/$max_attempts: Port 3000 not ready yet..."
+#             attempt=$((attempt + 1))
+#             sleep 2
+#           done
+
+#           echo "✗ Failed to connect to port 3000 after $max_attempts attempts"
+#           exit 1
+
+#       - name: Test AxonOps Server API (port 8080)
+#         run: |
+#           if curl -sf http://localhost:8080/api/v1/healthz > /dev/null; then
+#             echo "✓ AxonOps Server API is responding on port 8080"
+#           else
+#             echo "⚠ AxonOps Server API did not respond (may still be starting)"
+#           fi
+
+#       - name: Test Cassandra (port 9042)
+#         run: |
+#           if nc -z localhost 9042; then
+#             echo "✓ Cassandra is listening on port 9042"
+#           else
+#             echo "⚠ Cassandra is not responding on port 9042"
+#           fi
+
+#       - name: Run health check script
+#         run: |
+#           chmod +x ./check_health.sh
+#           if ./check_health.sh; then
+#             echo "✓ Health check passed"
+#           else
+#             echo "⚠ Health check script reported issues (may be transient)"
+#           fi
+
+#       - name: Collect logs on failure
+#         if: failure()
+#         run: |
+#           echo "=== Docker Compose Logs ==="
+#           docker compose logs
+#           echo ""
+#           echo "=== Docker Stats ==="
+#           docker stats --no-stream
+#           echo ""
+#           echo "=== Service Status ==="
+#           docker compose ps -a
+
+#       - name: Cleanup
+#         if: always()
+#         run: docker compose down -v

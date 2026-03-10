@@ -2,10 +2,9 @@
 
 set -e
 
-# Default memory configurations (in GB)
-ELASTICSEARCH_HEAP_SIZE=${ELASTICSEARCH_HEAP_SIZE:-8}
-CASSANDRA_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-8}
-CASSANDRA_HEAP_NEWSIZE=${CASSANDRA_HEAP_NEWSIZE:-800m}
+# Default memory configurations
+OPENSEARCH_HEAP_SIZE=${OPENSEARCH_HEAP_SIZE:-2g}
+CASSANDRA_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-1024M}
 
 # Color output
 RED='\033[0;31m'
@@ -36,9 +35,8 @@ Run AxonOps Server with Docker Compose
 OPTIONS:
     -h, --help                              Show this help message
     -d, --detach                            Run in detached mode
-    --es-heap SIZE                          Elasticsearch heap size (default: ${ELASTICSEARCH_HEAP_SIZE}g)
-    --cassandra-heap SIZE                   Cassandra heap size (default: ${CASSANDRA_HEAP_SIZE}g)
-    --cassandra-heap-newsize SIZE           Cassandra new generation heap size (default: ${CASSANDRA_HEAP_NEWSIZE})
+    --opensearch-heap SIZE                  OpenSearch heap size (default: ${OPENSEARCH_HEAP_SIZE})
+    --cassandra-heap SIZE                   Cassandra heap size (default: ${CASSANDRA_HEAP_SIZE})
     --down                                  Stop and remove containers
     --clean                                 Stop containers and remove volumes (WARNING: data will be lost)
 
@@ -46,11 +44,11 @@ EXAMPLES:
     # Run with default settings
     $0
 
-    # Run with custom Elasticsearch heap
-    $0 --es-heap 16
+    # Run with custom OpenSearch heap
+    $0 --opensearch-heap 4g
 
     # Run with custom memory for both services
-    $0 --es-heap 16 --cassandra-heap 16
+    $0 --opensearch-heap 4g --cassandra-heap 4096M
 
     # Run in detached mode
     $0 -d
@@ -62,9 +60,8 @@ EXAMPLES:
     $0 --clean
 
 ENVIRONMENT VARIABLES:
-    ELASTICSEARCH_HEAP_SIZE                 Default: 8 (GB)
-    CASSANDRA_HEAP_SIZE                     Default: 8 (GB)
-    CASSANDRA_HEAP_NEWSIZE                  Default: 800m
+    OPENSEARCH_HEAP_SIZE                    Default: 2g
+    CASSANDRA_HEAP_SIZE                     Default: 1024M
 EOF
 }
 
@@ -82,16 +79,12 @@ while [[ $# -gt 0 ]]; do
             DETACHED="-d"
             shift
             ;;
-        --es-heap)
-            ELASTICSEARCH_HEAP_SIZE="$2"
+        --opensearch-heap)
+            OPENSEARCH_HEAP_SIZE="$2"
             shift 2
             ;;
         --cassandra-heap)
             CASSANDRA_HEAP_SIZE="$2"
-            shift 2
-            ;;
-        --cassandra-heap-newsize)
-            CASSANDRA_HEAP_NEWSIZE="$2"
             shift 2
             ;;
         --down)
@@ -113,7 +106,7 @@ done
 # Handle down and clean actions
 if [ "$ACTION" = "down" ]; then
     print_info "Stopping AxonOps Server containers..."
-    docker-compose down
+    docker compose down
     exit 0
 fi
 
@@ -122,7 +115,7 @@ if [ "$ACTION" = "clean" ]; then
     read -p "Are you sure? (yes/no): " -r
     if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
         print_info "Cleaning up AxonOps Server..."
-        docker-compose down -v
+        docker compose down -v
         print_info "Cleanup complete"
     else
         print_info "Cleanup cancelled"
@@ -144,12 +137,11 @@ fi
 # Display configuration
 print_info "Starting AxonOps Server with the following configuration:"
 echo ""
-echo "  Elasticsearch:"
-echo "    Heap Size:          ${ELASTICSEARCH_HEAP_SIZE}g"
+echo "  OpenSearch:"
+echo "    Heap Size:          ${OPENSEARCH_HEAP_SIZE}"
 echo ""
 echo "  Cassandra:"
-echo "    Heap Size:          ${CASSANDRA_HEAP_SIZE}g"
-echo "    New Gen Heap Size:  ${CASSANDRA_HEAP_NEWSIZE}"
+echo "    Heap Size:          ${CASSANDRA_HEAP_SIZE}"
 echo ""
 
 # Check if Docker is running
@@ -160,18 +152,17 @@ fi
 
 # Start services
 print_info "Starting services..."
-export ELASTICSEARCH_HEAP_SIZE
+export OPENSEARCH_HEAP_SIZE
 export CASSANDRA_HEAP_SIZE
-export CASSANDRA_HEAP_NEWSIZE
-docker-compose up $DETACHED
+docker compose up $DETACHED
 
 if [ -n "$DETACHED" ]; then
     echo ""
     print_info "Services started in detached mode"
     print_info "Access AxonOps Dashboard at: http://localhost:3000"
     print_info "Cassandra port: 9042"
-    print_info "AxonOps Server port: 1888"
+    print_info "AxonOps Server agent port: 1888"
     echo ""
-    print_info "To view logs: docker-compose logs -f"
+    print_info "To view logs: docker compose logs -f"
     print_info "To stop: $0 --down"
 fi

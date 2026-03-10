@@ -1,257 +1,295 @@
-# AxonOps™ Server Docker Compose
-AxonOps is a comprehensive management platform designed for Apache Cassandra® and Apache Kafka®, offering unified monitoring, maintenance, and backup functionalities. Built by Cassandra and Kafka experts, it provides the only cloud-native solution to monitor, maintain and backup Apache Cassandra or Apache Kafka clusters through either SaaS or self-hosted deployments.
+# AxonOps Server Docker Compose
 
-For detailed documentation, visit:
-- Demo https://axonops.com/demo-sandbox/
-- Documentation: https://axonops.com/docs
-- Product Information: https://axonops.com
+AxonOps is a management platform for Apache Cassandra and Apache Kafka, offering monitoring, maintenance, and backup capabilities. This repository provides a simple way to run AxonOps locally using Docker Compose.
 
-For other self-host installation options like Kubernetes, see here: https://axonops.com/docs/installation-starter/axon-server/axonserver_install/
+**Links:**
+- [Live Demo](https://axonops.com/demo-sandbox/)
+- [Documentation](https://axonops.com/docs)
+- [Product Website](https://axonops.com)
+- [Kubernetes Installation](https://axonops.com/docs/installation-starter/axon-server/axonserver_install/)
 
-## Table of Contents
+---
 
-1.  [Self-Hosting AxonOps](#self-hosting-axonops)
-    *   [Install License (Optional)](#install-license-optional)
-2.  [Container Runtime Options](#container-runtime-options)
-3.  [Accessing AxonOps](#accessing-axonops)
-4.  [Compose Structure](#compose-structure)
-    *   [Overview](#overview)
-    *   [Key Components](#key-components)
-    *   [Service Details](#service-details)
-    *   [Notes](#notes)
-5.  [Instructions](#instructions)
-    *   [Using Docker](#using-docker)
-    *   [Using Podman](#using-podman)
-6.  [Health Check Script](#health-check-script)
-    *   [How the Script Works](#how-the-script-works)
-    *   [Usage](#usage)
-        *   [Example Output](#example-output)
+## Prerequisites
 
-## Self-Hosting AxonOps
-When self-hosting AxonOps using this `docker-compose.yml` file:
-1. The **axon-server** service acts as the backend, communicating with agents and exposing REST APIs.
-2. The **axon-dash** service provides the dashboards and user interface.
-3. Data is stored in:
-   - **Elasticsearch®**, which handles indexing and search functionality.
-   - **Cassandra**, which manages time-series data storage.
+Before you begin, make sure you have:
 
-### Install License (Optional)  
-AxonOps is free to use and includes a range of powerful features at no cost.
+1. **Docker Desktop** (recommended for beginners) or **Docker Engine** installed
+   - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac/Linux)
+   - Docker Desktop includes Docker Compose
 
-For enterprise customers with a license key, you can enhance your installation by adding the key to the `axon-server.yml` file. Ensure that the organization name matches the one used when obtaining your license.
+2. **Minimum System Requirements:**
+   - 4 GB RAM available for Docker (8 GB recommended)
+   - 10 GB free disk space
+   - macOS, Windows 10/11, or Linux
 
-## Container Runtime Options
-This project can be run using either [Docker](https://docker.com) or [Podman](https://podman.io).
+3. **Verify Docker is installed** by opening a terminal and running:
+   ```bash
+   docker --version
+   docker compose version
+   ```
+   You should see version numbers for both commands.
 
-It has been tested on Debian 12 with Docker, although it should work in other environments. Please raise an issue on the project if you encounter any problems specific to your setup.
+---
 
-## Accessing AxonOps
+## Quick Start
 
-Once the services are running, access the AxonOps dashboard at: http://localhost:3000 and you can configure your AxonOps agents to point at the AxonOps Server to start managing your cluster.
+### Step 1: Download the project
 
-For production deployments, ensure proper security configurations are in place and refer to the official documentation for advanced setup options.
-
-The platform provides dynamic dashboards for collecting logs and metrics, offering insights into cluster performance and health status. You can set up alerts for various metrics to ensure optimal performance.
-
-## Compose Structure
-
-The `docker-compose.yml` file in this repository defines the services, networks, and volumes required to self-host AxonOps in this fashion. Below is an explanation of its structure and key components.
-
-### Overview
-The `docker-compose.yml` file orchestrates the following services:
-1. **axon-server**: The core backend component of AxonOps. This service handles communication with agents and exposes REST APIs for configuration.
-2. **axon-dash**: The frontend component providing dashboards and a user interface for interacting with AxonOps.
-3. **Elasticsearch®**: A search engine used by AxonOps to store and index data.
-4. **Apache Cassandra®**: A distributed NoSQL database used by AxonOps to store time-series data.
-
-### Key Components
-
-#### **Volumes**
-The `docker-compose.yml` file uses Docker named volumes for Elasticsearch and Cassandra to ensure data durability across container restarts. These volumes are critical for storing logs and other data generated by AxonOps.
-
-> **_NOTE:_** In previous versions, the setup used directories for data storage. However, this caused compatibility issues for some users. To resolve this, the current version now uses named Docker volumes instead.
-If you're upgrading from an earlier version, please be aware of this change and adjust your setup accordingly.
-
-- **Elasticsearch Volumes**:
-  - `elasticsearch_data`: Persists Elasticsearch indices
-  - `elasticsearch_logs`: Persists Elasticsearch logs
-  - Ensures that all data stored in Elasticsearch remains intact even if the container is restarted.
-
-- **Cassandra Volumes**:
-  - `cassandra_data`: Persists time-series data and other information stored in Cassandra
-  - `cassandra_logs`: Persists Cassandra logs
-  - Guarantees data reliability and availability.
-
-- **AxonOps Volumes**:
-  - `axonops_logs`: Persists AxonOps Server and Dashboard logs
-
-### Service Details
-
-#### **axon-server**
-- Acts as the central hub for AxonOps agents.
-- Exposes REST APIs that allow users to configure AxonOps programmatically.
-- Handles incoming data from agents, processes it, and stores it in Elasticsearch and Cassandra.
-
-#### **axon-dash**
-- Provides the primary user interface for AxonOps.
-- Allows users to visualize data, monitor systems, and interact with dashboards.
-- Communicates with `axon-server` to fetch data for display.
-
-#### **elasticsearch**
-- Stores indexed data required by AxonOps for searching, analytics, and monitoring.
-- Configured with mounted volumes to persist indices and logs across restarts.
-
-#### **cassandra**
-- Stores time-series data used by AxonOps for long-term storage and analysis.
-- Configured with mounted volumes to ensure durability of stored data.
-
-### Notes
-- Both Elasticsearch and Cassandra are resource-intensive services; ensure your hosting environment has sufficient resources (CPU, memory, disk space) to handle their requirements effectively.
-- The default heap sizes are 8GB for both Elasticsearch and Cassandra. Adjust these values based on your workload using the `run.sh` script or environment variables.
-- Data is persisted in Docker named volumes, which survive container restarts and removals. Use `./run.sh --clean` to remove volumes and data.
-
-This structure ensures a robust deployment of AxonOps with all necessary components running seamlessly together in a single Docker Compose setup.
-
-## Instructions
-
-### Using run.sh Script (Recommended)
-
-The repository includes a `run.sh` script that simplifies service management and memory configuration.
-
-#### Quick Start
 ```bash
-# Clone repository
 git clone https://github.com/axonops/axonops-server-compose
 cd axonops-server-compose
-
-# Start services with default settings (8GB heap for Elasticsearch and Cassandra)
-./run.sh
 ```
 
-#### Custom Memory Configuration
-```bash
-# Run with custom Elasticsearch heap size
-./run.sh --es-heap 16
+Or [download the ZIP file](https://github.com/axonops/axonops-server-compose/archive/refs/heads/main.zip) and extract it.
 
-# Run with custom memory for both services
-./run.sh --es-heap 16 --cassandra-heap 16
-
-# Run with custom Cassandra new generation heap size
-./run.sh --cassandra-heap-newsize 1g
-
-# Run in detached mode
-./run.sh -d
-```
-
-#### Managing Services
-```bash
-# Stop services
-./run.sh --down
-
-# Clean everything including data (WARNING: destroys all data)
-./run.sh --clean
-```
-
-#### Environment Variables
-You can also set memory configurations via environment variables:
-```bash
-export ELASTICSEARCH_HEAP_SIZE=16
-export CASSANDRA_HEAP_SIZE=16
-export CASSANDRA_HEAP_NEWSIZE=1g
-./run.sh
-```
-
-#### Available Options
-- `-h, --help`: Show help message
-- `-d, --detach`: Run in detached mode
-- `--es-heap SIZE`: Elasticsearch heap size in GB (default: 8)
-- `--cassandra-heap SIZE`: Cassandra heap size in GB (default: 8)
-- `--cassandra-heap-newsize SIZE`: Cassandra new generation heap size (default: 800m)
-- `--down`: Stop and remove containers
-- `--clean`: Stop containers and remove volumes (destroys data)
-
-### Using Docker Compose Directly
-
-If you prefer to use Docker Compose directly without the run.sh script:
+### Step 2: Start AxonOps
 
 ```bash
-# Clone repository
-git clone https://github.com/axonops/axonops-server-compose
-cd axonops-server-compose
-
-# Start services with default settings
 docker compose up -d
-
-# Start with custom memory settings
-ELASTICSEARCH_HEAP_SIZE=16 CASSANDRA_HEAP_SIZE=16 docker compose up -d
 ```
 
-### Using Podman
+This command:
+- Downloads the required container images (first time only)
+- Starts all services in the background (`-d` means "detached")
+- May take 2-5 minutes on first run
+
+### Step 3: Wait for services to be ready
+
+Check the status of all services:
 ```bash
-# Clone repository
-git clone https://github.com/axonops/axonops-server-compose
-cd axonops-server-compose
-
-# Start services
-podman compose up -d
+docker compose ps
 ```
+
+Wait until all services show `healthy` in the STATUS column. You can also watch the logs:
+```bash
+docker compose logs -f
+```
+
+Press `Ctrl+C` to stop watching logs.
+
+### Step 4: Access the dashboard
+
+Open your web browser and go to: **http://localhost:3000**
+
+You're now ready to configure your AxonOps agents to connect to the server on port `1888`.
+
+---
+
+## Managing AxonOps
+
+### View running services
+```bash
+docker compose ps
+```
+
+### View logs
+```bash
+# All services
+docker compose logs -f
+
+# Specific service
+docker compose logs -f axon-server
+```
+
+### Stop AxonOps (keeps your data)
+```bash
+docker compose down
+```
+
+### Start AxonOps again
+```bash
+docker compose up -d
+```
+
+### Stop and delete all data (fresh start)
+```bash
+docker compose down -v
+```
+
+> **Warning:** The `-v` flag removes all stored data. Only use this if you want to start fresh.
+
+---
+
+## Configuration
+
+### Memory Settings
+
+By default, the services use conservative memory settings suitable for development:
+- OpenSearch: 2 GB heap
+- Cassandra: 1 GB heap
+
+For production or larger workloads, increase the memory by setting environment variables before starting:
+
+```bash
+# Set custom memory (before running docker compose up)
+export OPENSEARCH_HEAP_SIZE=4g
+export CASSANDRA_HEAP_SIZE=4096M
+
+# Then start services
+docker compose up -d
+```
+
+Or set them inline:
+```bash
+OPENSEARCH_HEAP_SIZE=4g CASSANDRA_HEAP_SIZE=4096M docker compose up -d
+```
+
+### Authentication
+
+The services use default credentials. For production deployments, change these by setting environment variables:
+
+```bash
+export AXONOPS_SEARCH_USER=admin
+export AXONOPS_SEARCH_PASSWORD=your-secure-password
+export AXONOPS_DB_USERNAME=your-secure-password
+```
+
+### License Key (Optional)
+
+AxonOps is free to use. Enterprise customers with a license key can add it to `axon-server.yml`:
+
+```yaml
+license_key: "your-license-key"
+org: "your-organization-name"
+```
+
+---
+
+## Architecture
+
+This setup runs four services:
+
+| Service | Description | Port |
+|---------|-------------|------|
+| **axon-server** | Backend API server - handles agent connections and data processing | 1888 (agents), 8080 (API) |
+| **axon-dash** | Web dashboard for monitoring and configuration | 3000 |
+| **axondb-search** | OpenSearch database for indexing and search | 9200 (internal) |
+| **timseriesdb** | Cassandra database for time-series data storage | 9042 |
+
+### Data Storage
+
+Your data is stored in Docker volumes, which persist across restarts:
+
+| Volume | Purpose |
+|--------|---------|
+| `searchdb_data` | OpenSearch indices and data |
+| `timeseriesdb_data` | Cassandra time-series data |
+| `axonops_logs` | Application logs |
+
+To see your volumes:
+```bash
+docker volume ls
+```
+
+---
+
+## Troubleshooting
+
+### Services won't start or keep restarting
+
+1. **Check available memory:**
+   ```bash
+   docker stats --no-stream
+   ```
+   If memory is maxed out, increase Docker's memory limit in Docker Desktop settings, or reduce heap sizes.
+
+2. **Check logs for errors:**
+   ```bash
+   docker compose logs axondb-search
+   docker compose logs timseriesdb
+   ```
+
+3. **Restart everything fresh:**
+   ```bash
+   docker compose down -v
+   docker compose up -d
+   ```
+
+### "Cannot connect to the Docker daemon"
+
+- **Mac/Windows:** Make sure Docker Desktop is running
+- **Linux:** Start the Docker service: `sudo systemctl start docker`
+
+### "Port already in use"
+
+Another application is using port 3000, 1888, or 9042. Either:
+- Stop the other application
+- Or edit `docker-compose.yml` to use different ports (e.g., change `"3000:3000"` to `"3001:3000"`)
+
+### Services are "unhealthy"
+
+Wait a few minutes - the databases need time to initialize. If they stay unhealthy:
+```bash
+# Check what's wrong
+docker compose logs axondb-search
+docker compose logs timseriesdb
+
+# Try restarting
+docker compose restart
+```
+
+### Dashboard shows "Cannot connect to server"
+
+The axon-server may still be starting. Wait for it to become healthy:
+```bash
+docker compose ps
+```
+
+---
+
+## Using Podman (Alternative to Docker)
+
+If you prefer Podman:
+```bash
+podman compose up -d
+podman compose ps
+podman compose down
+```
+
+---
 
 ## Health Check Script
 
-This repository includes a **health-check script** (`health-check.sh`) designed to monitor and verify the status of services running in a Docker or Podman Compose environment. It ensures that all expected services in the Compose environment are running and healthy. It helps system administrators or developers quickly identify issues with containerized services by logging errors for any missing or unhealthy services.
-
-### How the Script Works
-
-1. **Logging Errors**:
-   - The script uses a `log_error` function to log error messages to the system's syslog with the tag `container-health-check`.
-
-2. **Container Runtime Selection**:
-   - By default, the script assumes the container runtime is `docker`.
-   - If `podman` is passed as an argument, it switches to using Podman.
-   - If an invalid argument is passed, the script exits with an error message.
-
-3. **Runtime Validation**:
-   - The script checks if the selected container runtime (`docker` or `podman`) is installed and available in the system's PATH.
-   - It also verifies that the Compose plugin for the selected runtime is installed.
-
-4. **Service Status Check**:
-   - The script uses `docker compose ps` (or `podman compose ps`) to list all services in the Compose environment.
-   - It compares these services against a predefined list of expected services: `elasticsearch`, `cassandra`, `axon-server`, and `axon-dash`.
-   - If any expected service is not running, it logs an error.
-
-5. **Health Status Check**:
-   - For each running service, the script retrieves its health status using the `inspect` command.
-   - If a service's health status is not `healthy`, or if its health check fails, an error is logged.
-
-6. **Exit Code**:
-   - The script exits with a code of `0` if all services are running and healthy.
-   - If any issues are detected (e.g., missing or unhealthy services), it exits with a non-zero code.
-
-### **Usage**
-
-To run the script:
+The `check_health.sh` script verifies all services are running correctly:
 
 ```bash
-./health-check.sh [runtime]
+./check_health.sh
 ```
 
-- `[runtime]`: Optional argument to specify the container runtime (`docker` or `podman`). Defaults to `docker`.
+If everything is healthy, you'll see no output. If there are problems, you'll see error messages like:
+```
+ERROR: Service timseriesdb is not running
+ERROR: Service axondb-search is not healthy. Current status: starting
+```
 
-#### **Example Output**
+For Podman users:
+```bash
+./check_health.sh podman
+```
 
-- If all services are running and healthy:
-  ```bash
-  # No output; exit code 0
-  ```
+---
 
-- If a service is missing or unhealthy:
-  ```bash
-  ERROR: Service cassandra is not running
-  ERROR: Service elasticsearch is not healthy. Current status: starting
-  ```
+## Useful Commands Reference
 
-The errors are also logged to syslog for further debugging.
+| Task | Command |
+|------|---------|
+| Start services | `docker compose up -d` |
+| Stop services | `docker compose down` |
+| View status | `docker compose ps` |
+| View logs | `docker compose logs -f` |
+| Restart a service | `docker compose restart axon-server` |
+| Delete everything | `docker compose down -v` |
+| Update images | `docker compose pull && docker compose up -d` |
 
-***
+---
 
-This project may contain trademarks or logos for projects, products, or services. Any use of third-party trademarks or logos are subject to those third-party's policies. AxonOps is a registered trademark of AxonOps Limited. Apache, Apache Cassandra, Cassandra, Apache Spark, Spark, Apache TinkerPop, TinkerPop, Apache Kafka and Kafka are either registered trademarks or trademarks of the Apache Software Foundation or its subsidiaries in Canada, the United States and/or other countries. Elasticsearch is a trademark of Elasticsearch B.V., registered in the U.S. and in other countries. Docker is a trademark or registered trademark of Docker, Inc. in the United States and/or other countries.
+## Getting Help
+
+- **Documentation:** https://axonops.com/docs
+- **Issues:** https://github.com/axonops/axonops-server-compose/issues
+- **Support:** https://axonops.com/contact
+
+---
+
+*This project may contain trademarks or logos for projects, products, or services. Any use of third-party trademarks or logos are subject to those third-party's policies. AxonOps is a registered trademark of AxonOps Limited. Apache, Apache Cassandra, Cassandra, Apache Kafka and Kafka are either registered trademarks or trademarks of the Apache Software Foundation. Docker is a trademark of Docker, Inc. OpenSearch is a trademark of Amazon Web Services.*

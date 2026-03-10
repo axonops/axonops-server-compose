@@ -1,6 +1,6 @@
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
+  axondb-search:
+    image: ghcr.io/axonops/axondb-search:3.3.2
     cap_add:
       - IPC_LOCK
     ulimits:
@@ -10,19 +10,26 @@ services:
     restart: unless-stopped
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms${ELASTICSEARCH_HEAP_SIZE:-8}g -Xmx${ELASTICSEARCH_HEAP_SIZE:-8}g"
+      - cluster.name=axondb-search-cluster
+      - node.name=opensearch-node1
+      - network.host=0.0.0.0
+      - OPENSEARCH_HEAP_SIZE=${OPENSEARCH_HEAP_SIZE:-1g}
+      - AXONOPS_SEARCH_TLS_ENABLED=false
+      - GENERATE_CERTS_ON_STARTUP=false
+      - AXONOPS_SEARCH_ENABLE_BACKUPS=false
+      - AXONOPS_SEARCH_USER=${AXONOPS_SEARCH_USER:-admin}
+      - AXONOPS_SEARCH_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-      - elasticsearch_logs:/usr/share/elasticsearch/logs
+      - searchdb_data:/usr/share/opensearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -sS http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow\\&timeout=5s || exit 1"]
+      test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh readiness"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 30
       start_period: 90s
 
-  cassandra:
-    image: cassandra:4.1
+  timseriesdb:
+    image: ghcr.io/axonops/axondb-timeseries:5.0.6
     cap_add:
       - IPC_LOCK
     ulimits:
@@ -30,49 +37,54 @@ services:
         soft: -1
         hard: -1
     restart: unless-stopped
-    entrypoint: |
-      sh -c "sed -i 's/^batch_size_warn_threshold:.*$/batch_size_warn_threshold: 64KiB/; s/^batch_size_fail_threshold:.*$/batch_size_fail_threshold: 640KiB/' /etc/cassandra/cassandra.yaml && exec /usr/local/bin/docker-entrypoint.sh"
-    volumes:
-      - cassandra_data:/var/lib/cassandra
-      - cassandra_logs:/var/log/cassandra
     environment:
-      - CASSANDRA_CLUSTER_NAME=axonops-cluster
-      - MAX_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-8}g
-      - HEAP_NEWSIZE=${CASSANDRA_HEAP_NEWSIZE:-800m}
+      - CASSANDRA_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-1024M}
+      - AXONOPS_DB_USER=${AXONOPS_DB_USER:-axonops}
+      - AXONOPS_DB_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
+    volumes:
+      - timeseriesdb_data:/var/lib/cassandra
     ports:
       - "9042:9042"
     depends_on:
-      elasticsearch:
+      axondb-search:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "nodetool statusbinary | grep -E '^running$'"]
+      test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh readiness"]
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 20
       start_period: 90s
 
   axon-server:
-    image: registry.axonops.com/axonops-public/axonops-docker/axon-server:latest
+    image: registry.axonops.com/axonops-public/axonops-docker/axon-server:2.0.25
     restart: unless-stopped
-    command: ["/usr/share/axonops/axon-server"]
+    command: ["/usr/share/axonops/axon-server", "-o", "stdout"]
     ports:
       - "1888:1888"
     depends_on:
-      elasticsearch:
+      axondb-search:
         condition: service_healthy
-      cassandra:
+      timseriesdb:
         condition: service_healthy
+    environment:
+      - SEARCH_DB_USERNAME=${AXONOPS_SEARCH_USER:-admin}
+      - SEARCH_DB_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
+      - SEARCH_DB_HOSTS=http://axondb-search:9200
+      - SEARCH_DB_SKIP_VERIFY=true
+      - CQL_USERNAME=${AXONOPS_DB_USER:-axonops}
+      - CQL_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseuIU}
     healthcheck:
-      test: ["CMD", "curl", "-sf", "127.0.0.1:8080"]
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/api/v1/healthz"]
       interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
+      retries: 10
     volumes:
-        - ./axon-server.yml:/etc/axonops/axon-server.yml:ro
-        - axonops_logs:/var/log/axonops
+      - ./axon-server.yml:/etc/axonops/axon-server.yml:ro
+      - axonops_logs:/var/log/axonops
 
   axon-dash:
-    image: registry.axonops.com/axonops-public/axonops-docker/axon-dash:latest
+    image: registry.axonops.com/axonops-public/axonops-docker/axon-dash:2.0.24
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -80,7 +92,7 @@ services:
       axon-server:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-sf", "127.0.0.1:3000"]
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:3000"]
       interval: 10s
       timeout: 5s
       start_period: 10s
@@ -89,8 +101,6 @@ services:
       - axonops_logs:/var/log/axonops
 
 volumes:
-  elasticsearch_data:
-  elasticsearch_logs:
-  cassandra_data:
-  cassandra_logs:
+  searchdb_data:
+  timeseriesdb_data:
   axonops_logs:
