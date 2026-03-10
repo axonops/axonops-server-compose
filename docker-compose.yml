@@ -39,8 +39,8 @@ services:
     restart: unless-stopped
     environment:
       - CASSANDRA_HEAP_SIZE=${CASSANDRA_HEAP_SIZE:-1024M}
-      - AXONOPS_DB_USER=admin
-      - AXONOPS_DB_USERNAME=${AXONOPS_DB_USERNAME:-6MP6RzBOpSMKIihacHU0wseu+IU}
+      - AXONOPS_DB_USER=${AXONOPS_DB_USER:-admin}
+      - AXONOPS_DB_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
     volumes:
       - timeseriesdb_data:/var/lib/cassandra
     ports:
@@ -71,6 +71,8 @@ services:
       - SEARCH_DB_PASSWORD=${AXONOPS_SEARCH_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
       - SEARCH_DB_HOSTS=http://axondb-search:9200
       - SEARCH_DB_SKIP_VERIFY=true
+      - CQL_USERNAME=${AXONOPS_DB_USER:-admin}
+      - CQL_PASSWORD=${AXONOPS_DB_PASSWORD:-6MP6RzBOpSMKIihacHU0wseu+IU}
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/api/v1/healthz"]
       interval: 10s
